@@ -1,5 +1,5 @@
 import React, { Component} from 'react';
-import Login from './components/Login';
+import Login from '../presentational/Login';
 
 export default class Header extends Component {
     render() {
