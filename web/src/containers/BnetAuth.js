@@ -15,8 +15,8 @@ class BnetAuth extends Component {
         return (
             <OauthReceiver
                 tokenUrl="https://us.battle.net/oauth/token"
-                clientId={process.env.BNET_CLIENT_ID}
-                clientSecret={process.env.BNET_CLIENT_SECRET}
+                clientId={process.env.REACT_APP_BNET_CLIENT_ID}
+                clientSecret={process.env.REACT_APP_BNET_CLIENT_SECRET}
                 redirectUri="http://localhost:3000/auth/bnet"
                 onAuthSuccess={this.handleSuccess}
                 onAuthError={this.handleError}

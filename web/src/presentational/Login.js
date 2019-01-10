@@ -7,9 +7,10 @@ export default class Login extends Component {
             <div>
                 <OauthSender
                     authorizeUrl="https://us.battle.net/oauth/authorize"
-                    clientId={process.env.BNET_CLIENT_ID}
+                    clientId={process.env.REACT_APP_BNET_CLIENT_ID}
                     redirectUri="http://localhost:3000/auth/bnet"
                     state={{ from: '/' }}
+                    args={{ response_type: 'code', scope: 'wow.profile' }}
                     render={({ url }) => <a href={url}>Login</a>}
                 />
             </div>
