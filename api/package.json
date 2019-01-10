@@ -4,14 +4,18 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.16.4",
-    "passport": "^0.4.0",
-    "passport-bnet": "^2.0.0"
+    "babel-preset-env": "^1.7.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "monk": "^6.0.6"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "nodemon --exec babel-node ./index.js"
   },
   "author": "",
   "license": "ISC"

@@ -1,9 +1,21 @@
 import React, { Component } from 'react';
 import { OauthReceiver } from 'react-oauth-flow';
+import { connect } from 'react-redux';
 
 class BnetAuth extends Component {
-    handleSuccess = async () => {
+    handleSuccess = async (accessToken, {response, state }) => {
+        console.log('Successfully authorized')
+        console.log(accessToken)
+        console.log(response)
 
+        let userInfo = await fetch('https://us.battle.net/oauth/userinfo', {
+            method: "GET",
+            headers: { 
+                "Content-Type" : "application/json",
+                "Authorization" : `Bearer ${accessToken}`
+            }
+        });
+        console.log(userInfo.json());
     };
 
     handleError = error => {
@@ -33,4 +45,8 @@ class BnetAuth extends Component {
     }
 }
 
-export default BnetAuth;
+const mapStateToProps = state => {
+
+}
+
+export default connect(mapStateToProps)(BnetAuth);
