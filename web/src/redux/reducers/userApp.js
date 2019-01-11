@@ -1,5 +1,7 @@
 import { 
-    GET_USER_DATA
+    GET_USER_DATA,
+    RECEIVE_USER_DATA,
+    POST_USER_DATA
 } from '../actions';
 
 const userApp = (state = {}, action) => {
@@ -8,7 +10,14 @@ const userApp = (state = {}, action) => {
             return Object.assign({}, state, {
                status: 'fetching' 
             });
-
+        case RECEIVE_USER_DATA:
+            return Object.assign({}, state, {
+                status: 'received'
+            });
+        case POST_USER_DATA:
+            return Object.assign({}, state, {
+                status: 'posting'
+            });
         default:
             return state;
     }

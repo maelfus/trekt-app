@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "connected-react-router": "^6.1.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-oauth-flow": "^1.2.0",

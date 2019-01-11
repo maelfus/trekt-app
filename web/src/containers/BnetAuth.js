@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { OauthReceiver } from 'react-oauth-flow';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
+import { getUserData } from '../redux/actions'
 
 class BnetAuth extends Component {
     handleSuccess = async (accessToken, {response, state }) => {
@@ -15,7 +17,11 @@ class BnetAuth extends Component {
                 "Authorization" : `Bearer ${accessToken}`
             }
         });
-        console.log(userInfo.json());
+        
+        await this.props.dispatch(getUserData(userInfo.id));
+        
+        this.props.history.push(state.from)
+
     };
 
     handleError = error => {
@@ -46,7 +52,10 @@ class BnetAuth extends Component {
 }
 
 const mapStateToProps = state => {
-
+    const {userApp} = state;
+    return {
+        userApp: userApp
+    }
 }
 
-export default connect(mapStateToProps)(BnetAuth);
+export default withRouter(connect(mapStateToProps)(BnetAuth));

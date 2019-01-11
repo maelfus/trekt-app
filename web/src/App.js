@@ -1,27 +1,28 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
+
+import { ConnectedRouter } from 'connected-react-router';
+import { Route, Switch } from 'react-router-dom';
+
 import Header from './containers/Header';
 import BnetAuth from './containers/BnetAuth';
 import Home from './containers/Home';
-import {
-  BrowserRouter as Router,
-  Route,
-} from 'react-router-dom';
 
 
-class App extends Component {
-  render() {
+const App = ({ history }) => {
     return (
-        <Router>
+        <ConnectedRouter>
           <div>
             <Header />
 
-            <Route exact path="/" component={Home} />
-            <Route path="/auth/bnet" component={BnetAuth} /> 
+            <Switch>
+                <Route exact path="/" component={Home} />
+                <Route path="/auth/bnet" component={BnetAuth} /> 
+            </Switch>
+
           </div> 
-        </Router>
+        </ConnectedRouter>
     );
-  }
 }
 
 export default App;
