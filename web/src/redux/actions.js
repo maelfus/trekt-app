@@ -1,5 +1,3 @@
-import { access } from "fs";
-
 export const GET_USER_DATA = "GET_USER_DATA";
 const get_user_data = id => ({
     type: GET_USER_DATA,
@@ -51,11 +49,11 @@ const update_access_token = ( accessToken, expiry ) => ({
 })
 
 export const UPDATE_BNET_DATA = "UPDATE_BNET_DATA";
-const update_bnet_data = ( json ) => ({
+const update_bnet_data = ( battletag, id ) => ({
     type: UPDATE_BNET_DATA,
     payload: {
-        battletag: json.battletag,
-        id: json.id
+        battletag: battletag,
+        id: id
     }
 })
 
@@ -74,7 +72,7 @@ export function bnetLogIn(accessToken, expiry) {
                 error => console.error(`Error retrieving user info: ${error}`)
             )
             .then(
-                json => dispatch(update_bnet_data(json))
+                json => dispatch(update_bnet_data(json.battletag, json.id))
             )
     }
 }
