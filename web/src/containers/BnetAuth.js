@@ -2,24 +2,18 @@ import React, { Component } from 'react';
 import { OauthReceiver } from 'react-oauth-flow';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom'
-import { getUserData } from '../redux/actions'
+import { getUserData, bnetLogIn } from '../redux/actions'
 
 class BnetAuth extends Component {
-    handleSuccess = async (accessToken, {response, state }) => {
-        console.log('Successfully authorized')
-        console.log(accessToken)
-        console.log(response)
 
-        let userInfo = await fetch('https://us.battle.net/oauth/userinfo', {
-            method: "GET",
-            headers: { 
-                "Content-Type" : "application/json",
-                "Authorization" : `Bearer ${accessToken}`
-            }
-        });
+    handleSuccess = async (accessToken, { response, state }) => {
+
+        await this.props.dispatch(bnetLogIn(accessToken, response.expires_in));
+
+        // Pull userData from the db if it exists
+        await this.props.dispatch(getUserData(this.props.userApp.id));
         
-        await this.props.dispatch(getUserData(userInfo.id));
-        
+        // Return to the most recent page
         this.props.history.push(state.from)
 
     };
@@ -51,7 +45,7 @@ class BnetAuth extends Component {
     }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
     const {userApp} = state;
     return {
         userApp: userApp

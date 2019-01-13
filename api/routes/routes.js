@@ -9,5 +9,11 @@ router.route('/')
             res.json(listing);
         })
     })
+router.route('/user/:id')
+    .get((req, res) => {
+        collection.findOne({ userId: req.params.id }, (err, listing) => {
+            res.json(listing);
+        })
+    })
 
 export default router;

@@ -11,7 +11,7 @@ import Home from './containers/Home';
 
 const App = ({ history }) => {
     return (
-        <ConnectedRouter>
+        <ConnectedRouter history={history}>
           <div>
             <Header />
 
