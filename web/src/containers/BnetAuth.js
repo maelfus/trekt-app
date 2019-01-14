@@ -8,7 +8,7 @@ class BnetAuth extends Component {
 
     handleSuccess = async (accessToken, { response, state }) => {
 
-        await this.props.dispatch(bnetLogIn(accessToken, response.expires_in));
+        await this.props.dispatch(bnetLogIn(accessToken));
 
         // Pull userData from the db if it exists
         await this.props.dispatch(getUserData(this.props.userApp.id));

@@ -1,7 +1,9 @@
 import React, { Component} from 'react';
 import Login from '../presentational/Login';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-export default class Header extends Component {
+class Header extends Component {
     render() {
         return (
             <div className="App">
@@ -12,3 +14,12 @@ export default class Header extends Component {
         );
     }
 }
+
+const mapStateToProps = (state) => {
+    const {userApp} = state;
+    return {
+        userApp: userApp
+    }
+}
+
+export default withRouter(connect(mapStateToProps)(Header))
