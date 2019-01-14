@@ -19,3 +19,12 @@ Root
     session management
     database blah
  - bot (if needed for whatever reason)
+
+
+Upcoming TODO List:
+
+ - Main character select
+ - Guild Select/Import (registration?)
+ - Import Guild data 
+ - Import M+ data from raider.io 
+ - Dump User Data into mongo

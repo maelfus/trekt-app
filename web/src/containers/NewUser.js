@@ -9,12 +9,14 @@ class NewUser extends Component {
         super(props)
 
         this.state = {
-            newCharacterList: []
+            newCharacterList: [],
+            newUserButtonDisabled: false
         }
     }
 
-    handleButton = async () => {
-        // Add click-disable ???
+    handleNewUserButton = async () => {
+
+        this.setState({ newUserButtonDisabled: true })
         await this.props.dispatch(updateUser(this.props.userApp.accessToken, this.props.userApp.id))
         
         let newState = this.props.userApp.newCharacterList.map( (object) => { return Object.assign({}, object, { checked: false })})
@@ -45,7 +47,8 @@ class NewUser extends Component {
     render() {
         return(
             <div>
-                {this.props.userApp.newCharacterList === undefined && <input type="button" onClick={this.handleButton} value="Setup New User!" />}
+                {this.props.userApp.newCharacterList === undefined && 
+                <input type="button" onClick={this.handleNewUserButton} value="Setup New User!" disabled={this.state.newUserButtonDisabled} />}
                 {this.props.userApp.newCharacterList !== undefined && 
                 <div>
                     <p>Character List Loaded!<br />Select max level characters to track:</p>
