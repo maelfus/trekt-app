@@ -1,24 +1,38 @@
 import { 
-    GET_USER_DATA,
+    GETTING_USER_DATA,
     RECEIVE_USER_DATA,
+    REGISTER_NEW_USER,
+    UPDATE_NEW_USER_STAGE,
     UPDATE_ACCESS_TOKEN,
     UPDATE_BNET_DATA,
-    GET_CHARACTER_DATA,
+    GETTING_BNET_CHARACTER_DATA,
     UPDATE_NEW_CHARACTER_LIST,
     UPDATE_USER_DATA,
-    DELETE_NEW_CHARACTER_LIST
+    DELETE_NEW_CHARACTER_LIST,
 } from '../actions';
 
 const userApp = (state = {}, action) => {
     switch (action.type) {
-        case GET_USER_DATA:
+        case GETTING_USER_DATA:
             return Object.assign({}, state, {
                status: action.payload.status
             });
         case RECEIVE_USER_DATA:
             return Object.assign({}, state, {
                 status: action.payload.status,
-                userData: action.payload.json
+                characters: action.payload.json.characters
+
+                // Add additional db data stuff here as needed
+                // This is called when pulling user data from the database
+            });
+        case REGISTER_NEW_USER:
+            return Object.assign({}, state, {
+                status: action.payload.status,
+                newUserStage: action.payload.newUserStage
+            });
+        case UPDATE_NEW_USER_STAGE:
+            return Object.assign({}, state, {
+                newUserStage: action.payload.newUserStage
             });
         case UPDATE_ACCESS_TOKEN:
             return Object.assign({}, state, {
@@ -29,23 +43,23 @@ const userApp = (state = {}, action) => {
                 battletag: action.payload.battletag,
                 id: action.payload.id
             });
-        case GET_CHARACTER_DATA:
+        case GETTING_BNET_CHARACTER_DATA:
             return Object.assign({}, state, {
                 status: action.payload.status
-            })
+            });
         case UPDATE_NEW_CHARACTER_LIST:
             return Object.assign({}, state, {
                 status: action.payload.status,
                 newCharacterList: action.payload.newCharacterList
-            })
+            });
         case UPDATE_USER_DATA:
             return Object.assign({}, state, {
-                userData: action.payload.userData
-            })
+                characters: action.payload.characters
+            });
         case DELETE_NEW_CHARACTER_LIST:
             return Object.assign({}, state, {
                 newCharacterList: undefined
-            })
+            });
         default:
             return state;
     }

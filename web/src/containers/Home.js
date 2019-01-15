@@ -8,8 +8,8 @@ class Home extends Component {
     render() {
         return(
             <div>
-                {this.props.userApp.userData == null && this.props.userApp.id && <NewUser />}
-                {this.props.userApp.userData != null && <p>logged in?</p>}
+                {this.props.userApp.newUserStage >= 1 && this.props.userApp.id && <NewUser />}
+                {this.props.userApp.characters != null && this.props.userApp.newUserStage === undefined && <p>logged in?</p>}
             </div>
         );
     }

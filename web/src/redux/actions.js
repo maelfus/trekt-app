@@ -1,31 +1,48 @@
-export const GET_USER_DATA = "GET_USER_DATA";
-const get_user_data = id => ({
-    type: GET_USER_DATA,
+export const GETTING_USER_DATA = "GETTING_USER_DATA";
+const getting_user_data = () => ({
+    type: GETTING_USER_DATA,
     payload: {
-        userId: id
+        status: 'fetching user'
     }
 });
 
 export const RECEIVE_USER_DATA = "RECEIVE_USER_DATA";
-const receive_user_data = (id, json) => ({
+const receive_user_data = ( json ) => ({
     type: RECEIVE_USER_DATA,
     payload: {
-        userId: id,
+        status: 'ready',
         json
     }
 });
 
+export const REGISTER_NEW_USER = "REGISTER_NEW_USER";
+const register_new_user = (id) => ({
+    type: REGISTER_NEW_USER,
+    payload: {
+        status: 'new registration',
+        newUserStage: 1
+    }
+});
+
+export const UPDATE_NEW_USER_STAGE = "UPDATE_NEW_USER_STAGE";
+export const update_new_user_stage = ( stage ) => ({
+    type: UPDATE_NEW_USER_STAGE,
+    payload: {
+        newUserStage: stage
+    }
+})
+
 export function getUserData(id) {
     return (dispatch) => {
-        dispatch(get_user_data(id))
+        dispatch(getting_user_data())
         return fetch(`http://localhost:3005/api/user/${id}`)
             .then (
-                // (NYI) Verify that appropriate data was actually returned
                 response => response.json(),
                 error => console.error(`Error fetching listing: ${id} - ${error}`)
             )
             .then (
-                json => dispatch(receive_user_data(id, json))
+                // If there is no matching user in the database, register a new user, else send data to the store
+                json => json === null ? dispatch(register_new_user(id)) : dispatch(receive_user_data(json))
             )
     }
 };
@@ -67,11 +84,11 @@ export function bnetLogIn(accessToken) {
     }
 }
 
-export const GET_CHARACTER_DATA = 'GET_CHARACTER_DATA';
-const get_character_data = () => ({
-    type: GET_CHARACTER_DATA,
+export const GETTING_BNET_CHARACTER_DATA = 'GETTING_BNET_CHARACTER_DATA';
+const getting_bnet_character_data = () => ({
+    type: GETTING_BNET_CHARACTER_DATA,
     payload: {
-        status: 'updating'
+        status: 'fetching'
     }
 })
 
@@ -84,9 +101,10 @@ const update_new_character_list = ( characters ) => ({
     }
 })
 
-export function updateUser(accessToken, id) {
+// This function will need a slight rewrite when ready to add new characters to a users list
+export function fetchCharacters(accessToken) {
     return async (dispatch) => {
-        dispatch(get_character_data());
+        dispatch(getting_bnet_character_data());
         const response = await fetch(`https://us.api.blizzard.com/wow/user/characters?access_token=${accessToken}`)
         const body = await response.json();
         let characters = [];
@@ -96,19 +114,19 @@ export function updateUser(accessToken, id) {
 }
 
 export const UPDATE_USER_DATA = 'UPDATE_USER_DATA';
-const update_user_data = ( userData ) => ({
+const update_user_data = ( newCharacterData ) => ({
     type: UPDATE_USER_DATA,
     payload: {
-        userData: userData
+        characters: newCharacterData
     }
 })
 
-export function updateCharacterList( userData, characters ) {
+export function updateCharacterList( oldCharacterData, newCharacterList ) {
     return (dispatch) => {
-        const newUserData = Object.assign({}, userData, {
-            characters: characters
+        const newCharacterData = Object.assign({}, oldCharacterData, {
+            characters: newCharacterList
         })
-        dispatch(update_user_data(newUserData))
+        dispatch(update_user_data(newCharacterData))
     }
 }
 
