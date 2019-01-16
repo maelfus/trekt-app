@@ -9,7 +9,7 @@ class Home extends Component {
         return(
             <div>
                 {this.props.userApp.newUserStage >= 1 && this.props.userApp.id && <NewUser />}
-                {this.props.userApp.characters != null && this.props.userApp.newUserStage === undefined && <p>logged in?</p>}
+                {this.props.userApp.characters !== undefined && this.props.userApp.newUserStage === undefined && <p>logged in?</p>}
             </div>
         );
     }

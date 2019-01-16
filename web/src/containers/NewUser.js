@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage } from '../redux/actions';
+import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain } from '../redux/actions';
 import CharacterList from '../presentational/CharacterList';
 
 class NewUser extends Component {
@@ -10,7 +10,8 @@ class NewUser extends Component {
 
         this.state = {
             newCharacterList: [],
-            newUserButtonDisabled: false
+            newUserButtonDisabled: false,
+            selectedOption: null
         }
     }
 
@@ -33,18 +34,35 @@ class NewUser extends Component {
         this.setState({ newCharacterList: newState });
     }
 
+    handleOptionChange = (event) => {
+        this.setState({
+            selectedOption: event.target.value
+        });
+    }
+
     handleSubmit = async (event) => {
         event.preventDefault();
+        switch(this.props.userApp.newUserStage) {
+            case 2:
+                let selectedList = []
+                this.state.newCharacterList.forEach((char) => {
+                    if (char.checked === true) {
+                        delete char.checked;
+                        return selectedList.push(char);
+                    }
+                })
+                await this.props.dispatch(updateCharacterList(this.props.userApp.characters, selectedList));
 
-        let selectedList = []
-        this.state.newCharacterList.forEach((char) => {
-            if (char.checked === true) return selectedList.push(char);
-        })
-        await this.props.dispatch(updateCharacterList(this.props.userApp.characters, selectedList));
-
-        await this.props.dispatch(deleteNewCharacterList());
-        this.props.dispatch(update_new_user_stage(3));
-
+                await this.props.dispatch(deleteNewCharacterList());
+                return this.props.dispatch(update_new_user_stage(3));
+            case 3:
+                let selectedOption = parseInt(this.state.selectedOption.slice(6));
+                console.log(selectedOption);
+                await this.props.dispatch(updateMain(this.props.userApp.characters, selectedOption));
+                return this.props.dispatch(update_new_user_stage(4));
+            default: 
+                return;
+        }
     }
     render() {
         return(
@@ -55,13 +73,29 @@ class NewUser extends Component {
                 <div>
                     <p>Character List Loaded!<br />Select max level characters to track:</p>
                     <form onSubmit={this.handleSubmit}>
-                        {this.state.newCharacterList.map((object, i) => <CharacterList object={object} id={i} key={i} onChange={this.handleChange(i)} />)}
+                        {this.state.newCharacterList.map((object, i) => <CharacterList object={object} id={i} key={i} onChange={this.handleChange(i)} type="checkbox" />)}
                         <input type="submit" value="Submit" />
                     </form>
                 </div>}
                 {this.props.userApp.newUserStage === 3 &&
                 <div>
                     <p>STAGE 3 - Main Select!</p>
+                    <form onSubmit={this.handleSubmit}>
+                        {this.props.userApp.characters.map((object, i) => 
+                            <CharacterList object={object} 
+                                id={i} 
+                                key={i} 
+                                onChange={this.handleOptionChange} 
+                                type="radio" 
+                                value={"option" + i} 
+                                checked={this.state.selectedOption === "option" + i} 
+                                />)}
+                        <input type="submit" value="Save" />
+                    </form>
+                </div>}
+                {this.props.userApp.newUserStage === 4 &&
+                <div>
+                    <p>success? onto stage 4</p>
                 </div>}
             </div>
         )

@@ -123,9 +123,9 @@ const update_user_data = ( newCharacterData ) => ({
 
 export function updateCharacterList( oldCharacterData, newCharacterList ) {
     return (dispatch) => {
-        const newCharacterData = Object.assign({}, oldCharacterData, {
-            characters: newCharacterList
-        })
+        let newCharacterData = !Array.isArray(oldCharacterData) ? newCharacterList : null;
+        // this needs works to merge arrays if there is an existing character list for existing users.
+
         dispatch(update_user_data(newCharacterData))
     }
 }
@@ -138,5 +138,16 @@ export const delete_new_character_list = () => ({
 export function deleteNewCharacterList( ) {
     return (dispatch) => {
         dispatch(delete_new_character_list());
+    }
+}
+
+export function updateMain( characterList, id ) {
+    return async (dispatch) => {
+        let newCharacterData = [];
+        await characterList.forEach( (char, i) => { 
+            i === id ? char.main = true : char.main = false;
+            newCharacterData.push(char);
+        });
+        dispatch(update_user_data(newCharacterData))
     }
 }
