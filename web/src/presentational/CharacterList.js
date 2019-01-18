@@ -17,7 +17,7 @@ class CharacterList extends Component {
                     name={this.props.id} 
                     onChange={this.props.onChange} 
                     value={this.props.value || undefined} 
-                    checked={this.props.checked || undefined} />
+                    checked={this.props.checked}/>
                 </label>
             </p>
         );

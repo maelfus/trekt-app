@@ -88,14 +88,14 @@ class NewUser extends Component {
                                 onChange={this.handleOptionChange} 
                                 type="radio" 
                                 value={"option" + i} 
-                                checked={this.state.selectedOption === "option" + i} 
+                                checked={this.state.selectedOption === "option" + i}
                                 />)}
                         <input type="submit" value="Save" />
                     </form>
                 </div>}
                 {this.props.userApp.newUserStage === 4 &&
                 <div>
-                    <p>success? onto stage 4</p>
+                    
                 </div>}
             </div>
         )
