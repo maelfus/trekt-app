@@ -11,7 +11,7 @@ import {
     DELETE_NEW_CHARACTER_LIST,
 } from '../actions';
 
-const userApp = (state = {}, action) => {
+const user = (state = {}, action) => {
     switch (action.type) {
         case GETTING_USER_DATA:
             return Object.assign({}, state, {
@@ -65,4 +65,4 @@ const userApp = (state = {}, action) => {
     }
 }
 
-export default userApp;
+export default user;

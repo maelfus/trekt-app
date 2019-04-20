@@ -131,7 +131,7 @@ export function updateCharacterList( oldCharacterData, newCharacterList ) {
 }
 
 export const DELETE_NEW_CHARACTER_LIST = 'DELETE_NEW_CHARACTER_LIST';
-export const delete_new_character_list = () => ({
+const delete_new_character_list = () => ({
     type: DELETE_NEW_CHARACTER_LIST
 })
 
@@ -149,5 +149,25 @@ export function updateMain( characterList, id ) {
             newCharacterData.push(char);
         });
         dispatch(update_user_data(newCharacterData))
+    }
+}
+
+export function fetchGuild( character, accessToken ) {
+    return async (dispatch) => {
+        const response = await fetch(`https://us.api.blizzard.com/wow/guild/${character.guildRealm}/${character.guild}?fields=members&locale=en_US&access_token=${accessToken}`);
+        const charRank = response.body.members.find(char => char.character.name === character.name);
+
+        if (charRank.rank === 0) {
+            // verify guild hasnt already been registered
+            await fetch(`http://localhost:3005/api/guild/${character.guildRealm}/${character.guild}`)
+                .then (
+                    response => response.json(),
+                    error => console.error(`Error fetching guild: ${character.guildRealm}/${character.guild} - ${error}`)
+                )
+                .then (
+                    // If there is no matching guild in the database, register a new guild, else send data to the store
+                    json => json === null ? dispatch(register_new_guild(character.guildRealm, character.guild)) : dispatch(receive_guild_data(json))
+                )
+        }
     }
 }

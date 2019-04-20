@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain } from '../redux/actions';
+import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain, fetchGuild } from '../redux/actions';
 import CharacterList from '../presentational/CharacterList';
 
 class NewUser extends Component {
@@ -11,7 +11,8 @@ class NewUser extends Component {
         this.state = {
             newCharacterList: [],
             newUserButtonDisabled: false,
-            selectedOption: null
+            selectedOption: null,
+            statusImportButton: "Start Import"
         }
     }
 
@@ -64,6 +65,17 @@ class NewUser extends Component {
                 return;
         }
     }
+
+    handleImportButton = async () => {
+        // Pick out the character that we are going to work with and deactivate the import button
+        // to prevent multiple calls.
+        const mainChar = this.props.userApp.characters.find(char => char.main === true);
+        this.setState({ statusImportButton: `Fetching guild data for ${mainChar.name}`});
+
+        await this.props.dispatch(fetchGuild(mainChar, this.props.userApp.accessToken));
+
+
+    }
     render() {
         return(
             <div>
@@ -95,7 +107,13 @@ class NewUser extends Component {
                 </div>}
                 {this.props.userApp.newUserStage === 4 &&
                 <div>
+                    <p>Time to import all the things!</p>
+                    {/* This will import guild data for the player's main character, check their guild rank to see if they are an officer rank or higher
+                    and then import raider.io data and merge it with the existing character data.  Finally, it will save all this data to the database
+                    to complete user registration....  
                     
+                    That's a lot right?*/}
+                    <input type="button" onClick={this.handleImportButton} value={this.state.statusImportButton} disabled={this.state.statusImportButton !== "Start Import"} />
                 </div>}
             </div>
         )

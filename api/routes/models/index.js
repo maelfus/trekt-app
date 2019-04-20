@@ -1,6 +1,7 @@
 import monk from 'monk';
 
 const db = monk('localhost:27017/trekt');
-const collection = db.get('trekt');
 
-export default collection;
+export const users = db.get('users');
+export const guilds = db.get('guilds');
+export const characters = db.get('characters');
