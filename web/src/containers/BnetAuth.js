@@ -11,7 +11,7 @@ class BnetAuth extends Component {
         await this.props.dispatch(bnetLogIn(accessToken));
 
         // Pull userData from the db if it exists
-        await this.props.dispatch(getUserData(this.props.userApp.id));
+        await this.props.dispatch(getUserData(this.props.user.id));
         
         // Return to the most recent page
         this.props.history.push(state.from)
@@ -46,9 +46,9 @@ class BnetAuth extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const {userApp} = state;
+    const {user} = state;
     return {
-        userApp: userApp
+        user: user
     }
 }
 

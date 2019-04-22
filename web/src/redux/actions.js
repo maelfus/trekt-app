@@ -1,3 +1,9 @@
+//
+// USER ACTIONS
+//
+//  Actions related to the User reducer
+//
+
 export const GETTING_USER_DATA = "GETTING_USER_DATA";
 const getting_user_data = () => ({
     type: GETTING_USER_DATA,
@@ -16,7 +22,7 @@ const receive_user_data = ( json ) => ({
 });
 
 export const REGISTER_NEW_USER = "REGISTER_NEW_USER";
-const register_new_user = (id) => ({
+const register_new_user = () => ({
     type: REGISTER_NEW_USER,
     payload: {
         status: 'new registration',
@@ -42,7 +48,7 @@ export function getUserData(id) {
             )
             .then (
                 // If there is no matching user in the database, register a new user, else send data to the store
-                json => json === null ? dispatch(register_new_user(id)) : dispatch(receive_user_data(json))
+                json => json === null ? dispatch(register_new_user()) : dispatch(receive_user_data(json))
             )
     }
 };
@@ -84,6 +90,117 @@ export function bnetLogIn(accessToken) {
     }
 }
 
+export const UPDATE_USER_DATA = 'UPDATE_USER_DATA';
+const update_user_data = ( newCharacterData ) => ({
+    type: UPDATE_USER_DATA,
+    payload: {
+        characters: newCharacterData
+    }
+})
+
+// post an update user object back to our local db.  usefull for updating out stored access token (this might not be ideal) as well
+// as the users character index list.
+export function pushUserData(userObject, characters) {
+    return async (dispatch) => {
+
+
+    }
+}
+
+//
+// GUILD ACTIONS
+//
+// Actions related to the guild reducer
+//
+
+export const RECEIVE_GUILD_DATA = 'RECEOVE_GUILD_DATA';
+const receive_guild_data = (json) => ({
+    type: RECEIVE_GUILD_DATA,
+    payload: json
+})
+
+export function fetchGuild( character, accessToken ) {
+    return async (dispatch) => {
+        let response = await fetch(`https://us.api.blizzard.com/wow/guild/${character.guildRealm}/${character.guild}?fields=members&locale=en_US&access_token=${accessToken}`);
+        response = await response.json();
+        let charRank = response.members.find(char => char.character.name === character.name);
+
+        if (charRank.rank === 0) {
+            // verify guild hasnt already been registered
+            await fetch(`http://localhost:3005/api/guild/${character.guildRealm}/${character.guild}`)
+                .then (
+                    response => response.json(),
+                    error => console.error(`Error fetching guild: ${character.guildRealm}/${character.guild} - ${error}`)
+                )
+                .then (
+                    // If there is no matching guild in the database, register a new guild, else send data to the store
+                    json => json === null ? dispatch(registerNewGuild(character.guildRealm, character.guild, accessToken)) : dispatch(receive_guild_data(json))
+                )
+        } 
+    }
+}
+
+export function registerNewGuild( realm, guild, accessToken ) {
+    return async (dispatch) => {
+        await fetch(`https://us.api.blizzard.com/wow/guild/${realm}/${guild}?fields=members&locale=en_US&access_token=${accessToken}`)
+            .then (
+                response => response.json(),
+                error => console.error(`Error fetching guild: ${realm}/${guild} - ${ error}`)
+            )
+            .then (
+                json => {
+
+                }
+            )
+    }
+}
+
+//
+// CHARACTER ACTIONS
+//
+// Actions related to the characters reducer
+//
+
+export const UPDATE_CHARACTER_DATA = 'UPDATE_CHARACTER_DATA';
+const update_character_data = ( newCharacterData ) => ({
+    type: UPDATE_CHARACTER_DATA,
+    payload: {
+        characters: newCharacterData
+    }
+})
+
+export function updateMain( characterList, id ) {
+    return async (dispatch) => {
+        let newCharacterData = [];
+        await characterList.forEach( (char, i) => { 
+            i === id ? char.main = true : char.main = false;
+            newCharacterData.push(char);
+        });
+        dispatch(update_character_data(newCharacterData));
+    }
+}
+
+// This function will need a slight rewrite when ready to add new characters to a users list
+export function fetchCharacters(accessToken) {
+    return async (dispatch) => {
+        dispatch(getting_bnet_character_data());
+        const response = await fetch(`https://us.api.blizzard.com/wow/user/characters?access_token=${accessToken}`)
+        const body = await response.json();
+        let characters = [];
+        body.characters.forEach( (char) => char.level === 120 ? characters.push(char): null)
+        return dispatch(update_new_character_list(characters))
+    }
+}
+
+export function updateCharacterList( oldCharacterData, newCharacterList ) {
+    return (dispatch) => {
+        let newCharacterData = !Array.isArray(oldCharacterData) ? newCharacterList : null;
+        // this needs works to merge arrays if there is an existing character list for existing users.
+
+        dispatch(update_character_data(newCharacterData))
+    }
+}
+
 export const GETTING_BNET_CHARACTER_DATA = 'GETTING_BNET_CHARACTER_DATA';
 const getting_bnet_character_data = () => ({
     type: GETTING_BNET_CHARACTER_DATA,
@@ -101,35 +218,6 @@ const update_new_character_list = ( characters ) => ({
     }
 })
 
-// This function will need a slight rewrite when ready to add new characters to a users list
-export function fetchCharacters(accessToken) {
-    return async (dispatch) => {
-        dispatch(getting_bnet_character_data());
-        const response = await fetch(`https://us.api.blizzard.com/wow/user/characters?access_token=${accessToken}`)
-        const body = await response.json();
-        let characters = [];
-        body.characters.forEach( (char) => char.level === 120 ? characters.push(char): null)
-        return dispatch(update_new_character_list(characters))
-    }
-}
-
-export const UPDATE_USER_DATA = 'UPDATE_USER_DATA';
-const update_user_data = ( newCharacterData ) => ({
-    type: UPDATE_USER_DATA,
-    payload: {
-        characters: newCharacterData
-    }
-})
-
-export function updateCharacterList( oldCharacterData, newCharacterList ) {
-    return (dispatch) => {
-        let newCharacterData = !Array.isArray(oldCharacterData) ? newCharacterList : null;
-        // this needs works to merge arrays if there is an existing character list for existing users.
-
-        dispatch(update_user_data(newCharacterData))
-    }
-}
-
 export const DELETE_NEW_CHARACTER_LIST = 'DELETE_NEW_CHARACTER_LIST';
 const delete_new_character_list = () => ({
     type: DELETE_NEW_CHARACTER_LIST
@@ -141,33 +229,8 @@ export function deleteNewCharacterList( ) {
     }
 }
 
-export function updateMain( characterList, id ) {
-    return async (dispatch) => {
-        let newCharacterData = [];
-        await characterList.forEach( (char, i) => { 
-            i === id ? char.main = true : char.main = false;
-            newCharacterData.push(char);
-        });
-        dispatch(update_user_data(newCharacterData))
-    }
-}
-
-export function fetchGuild( character, accessToken ) {
-    return async (dispatch) => {
-        const response = await fetch(`https://us.api.blizzard.com/wow/guild/${character.guildRealm}/${character.guild}?fields=members&locale=en_US&access_token=${accessToken}`);
-        const charRank = response.body.members.find(char => char.character.name === character.name);
-
-        if (charRank.rank === 0) {
-            // verify guild hasnt already been registered
-            await fetch(`http://localhost:3005/api/guild/${character.guildRealm}/${character.guild}`)
-                .then (
-                    response => response.json(),
-                    error => console.error(`Error fetching guild: ${character.guildRealm}/${character.guild} - ${error}`)
-                )
-                .then (
-                    // If there is no matching guild in the database, register a new guild, else send data to the store
-                    json => json === null ? dispatch(register_new_guild(character.guildRealm, character.guild)) : dispatch(receive_guild_data(json))
-                )
-        }
+export function pushCharacterData(character) {
+    return (dispatch) => {
+        
     }
 }

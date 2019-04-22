@@ -11,10 +11,17 @@ router.route('/')
         })
     })
 */
-    router.route('/user/:id')
+router.route('/user/:id')
     .get((req, res) => {
-        users.findOne({ userId: req.params.id }, (err, listing) => {
-            res.json(listing);
+        users.findOne({ userId: req.params.id }, (err, doc) => {
+            res.json(doc);
+        })
+    })
+
+router.route('/guild/:realm/:guild')
+    .get((req, res) => {
+        guilds.findOne({ realm: req.params.realm, guild: req.params.guild }, (err, doc) => {
+            res.json(doc);
         })
     })
 

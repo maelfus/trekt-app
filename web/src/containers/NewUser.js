@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain, fetchGuild } from '../redux/actions';
+import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain, fetchGuild, pushUserData, pushCharacterData } from '../redux/actions';
 import CharacterList from '../presentational/CharacterList';
 
 class NewUser extends Component {
@@ -19,9 +19,9 @@ class NewUser extends Component {
     handleNewUserButton = async () => {
 
         this.setState({ newUserButtonDisabled: true })
-        await this.props.dispatch(fetchCharacters(this.props.userApp.accessToken))
+        await this.props.dispatch(fetchCharacters(this.props.user.accessToken))
         
-        let newState = this.props.userApp.newCharacterList.map( (object) => { return Object.assign({}, object, { checked: false })})
+        let newState = this.props.characters.newCharacterList.map( (object) => { return Object.assign({}, object, { checked: false })})
         this.setState({ newCharacterList: newState })
         this.props.dispatch(update_new_user_stage(2))
     
@@ -43,24 +43,31 @@ class NewUser extends Component {
 
     handleSubmit = async (event) => {
         event.preventDefault();
-        switch(this.props.userApp.newUserStage) {
+        switch(this.props.user.newUserStage) {
             case 2:
                 let selectedList = []
                 this.state.newCharacterList.forEach((char) => {
                     if (char.checked === true) {
                         delete char.checked;
+                        // make sure we are tagging every new character added with the users id
+                        char.userid = this.props.user.id
                         return selectedList.push(char);
                     }
                 })
-                await this.props.dispatch(updateCharacterList(this.props.userApp.characters, selectedList));
+                await this.props.dispatch(updateCharacterList(this.props.characters.characters, selectedList));
 
                 await this.props.dispatch(deleteNewCharacterList());
                 return this.props.dispatch(update_new_user_stage(3));
             case 3:
                 let selectedOption = parseInt(this.state.selectedOption.slice(6));
                 console.log(selectedOption);
-                await this.props.dispatch(updateMain(this.props.userApp.characters, selectedOption));
+                await this.props.dispatch(updateMain(this.props.characters.characters, selectedOption));
                 return this.props.dispatch(update_new_user_stage(4));
+            case 4:
+                // This is the final save of the new user to the local db
+                await this.props.dispatch(pushUserData(this.props.user, this.props.characters.characters));
+                await this.props.dispatch(pushCharacterData(this.props.characters.characters))
+                break;
             default: 
                 return;
         }
@@ -69,19 +76,21 @@ class NewUser extends Component {
     handleImportButton = async () => {
         // Pick out the character that we are going to work with and deactivate the import button
         // to prevent multiple calls.
-        const mainChar = this.props.userApp.characters.find(char => char.main === true);
+        const mainChar = this.props.characters.characters.find(char => char.main === true);
         this.setState({ statusImportButton: `Fetching guild data for ${mainChar.name}`});
 
-        await this.props.dispatch(fetchGuild(mainChar, this.props.userApp.accessToken));
+
+        // Probably move this to another area and just import character data?
+        await this.props.dispatch(fetchGuild(mainChar, this.props.user.accessToken));
 
 
     }
     render() {
         return(
             <div>
-                {this.props.userApp.newUserStage === 1 && 
+                {this.props.user.newUserStage === 1 && 
                 <input type="button" onClick={this.handleNewUserButton} value="Setup New User!" disabled={this.state.newUserButtonDisabled} />}
-                {this.props.userApp.newUserStage === 2 && 
+                {this.props.user.newUserStage === 2 && 
                 <div>
                     <p>Character List Loaded!<br />Select max level characters to track:</p>
                     <form onSubmit={this.handleSubmit}>
@@ -89,11 +98,11 @@ class NewUser extends Component {
                         <input type="submit" value="Submit" />
                     </form>
                 </div>}
-                {this.props.userApp.newUserStage === 3 &&
+                {this.props.user.newUserStage === 3 &&
                 <div>
                     <p>STAGE 3 - Main Select!</p>
                     <form onSubmit={this.handleSubmit}>
-                        {this.props.userApp.characters.map((object, i) => 
+                        {this.props.characters.characters.map((object, i) => 
                             <CharacterList object={object} 
                                 id={i} 
                                 key={i} 
@@ -105,7 +114,13 @@ class NewUser extends Component {
                         <input type="submit" value="Save" />
                     </form>
                 </div>}
-                {this.props.userApp.newUserStage === 4 &&
+                {this.props.user.newUserStage === 4 &&
+                <div>
+                    <form onSubmit={this.handleSubmit}>
+                        <input type="submit" value="Finish Registration" />
+                    </form>
+                </div>}
+                {this.props.user.newUserStage === 5 &&
                 <div>
                     <p>Time to import all the things!</p>
                     {/* This will import guild data for the player's main character, check their guild rank to see if they are an officer rank or higher
@@ -121,9 +136,11 @@ class NewUser extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const {userApp} = state;
+    const {user, characters, guild} = state;
     return {
-        userApp: userApp
+        user: user,
+        characters: characters,
+        guild: guild
     }
 }
 
