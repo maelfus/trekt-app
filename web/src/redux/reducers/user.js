@@ -4,8 +4,8 @@ import {
     REGISTER_NEW_USER,
     UPDATE_NEW_USER_STAGE,
     UPDATE_ACCESS_TOKEN,
-    UPDATE_BNET_DATA,
-    UPDATE_USER_DATA,
+    UPDATE_BNET_DATA
+//    UPDATE_USER_DATA
 } from '../actions';
 
 const user = (state = {}, action) => {
@@ -22,12 +22,14 @@ const user = (state = {}, action) => {
                 // Add additional db data stuff here as needed
                 // This is called when pulling user data from the database
             });
+/* FIXME: Commenting out until such time as is necessary
         case UPDATE_USER_DATA:
             return Object.assign({}, state, {
                 //characters: action.payload.characters
 
                 // add the replacement user object
             });
+*/
         case REGISTER_NEW_USER:
             return Object.assign({}, state, {
                 status: action.payload.status,

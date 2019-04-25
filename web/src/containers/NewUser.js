@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain, fetchGuild, pushUserData, pushCharacterData } from '../redux/actions';
+import { updateCharacterList, deleteNewCharacterList, fetchCharacters, update_new_user_stage, updateMain, pushUserData, pushCharacterData } from '../redux/actions';
 import CharacterList from '../presentational/CharacterList';
 
 class NewUser extends Component {
@@ -51,6 +51,8 @@ class NewUser extends Component {
                         delete char.checked;
                         // make sure we are tagging every new character added with the users id
                         char.userid = this.props.user.id
+
+                        // return the finished list
                         return selectedList.push(char);
                     }
                 })
@@ -64,8 +66,8 @@ class NewUser extends Component {
                 await this.props.dispatch(updateMain(this.props.characters.characters, selectedOption));
                 return this.props.dispatch(update_new_user_stage(4));
             case 4:
-                // This is the final save of the new user to the local db
-                await this.props.dispatch(pushUserData(this.props.user, this.props.characters.characters));
+                // This is the final save of the new user and their characters of choice to the local db
+                await this.props.dispatch(pushUserData(this.props.user));
                 await this.props.dispatch(pushCharacterData(this.props.characters.characters))
                 break;
             default: 
@@ -73,18 +75,7 @@ class NewUser extends Component {
         }
     }
 
-    handleImportButton = async () => {
-        // Pick out the character that we are going to work with and deactivate the import button
-        // to prevent multiple calls.
-        const mainChar = this.props.characters.characters.find(char => char.main === true);
-        this.setState({ statusImportButton: `Fetching guild data for ${mainChar.name}`});
 
-
-        // Probably move this to another area and just import character data?
-        await this.props.dispatch(fetchGuild(mainChar, this.props.user.accessToken));
-
-
-    }
     render() {
         return(
             <div>
@@ -120,27 +111,16 @@ class NewUser extends Component {
                         <input type="submit" value="Finish Registration" />
                     </form>
                 </div>}
-                {this.props.user.newUserStage === 5 &&
-                <div>
-                    <p>Time to import all the things!</p>
-                    {/* This will import guild data for the player's main character, check their guild rank to see if they are an officer rank or higher
-                    and then import raider.io data and merge it with the existing character data.  Finally, it will save all this data to the database
-                    to complete user registration....  
-                    
-                    That's a lot right?*/}
-                    <input type="button" onClick={this.handleImportButton} value={this.state.statusImportButton} disabled={this.state.statusImportButton !== "Start Import"} />
-                </div>}
             </div>
         )
     }
 }
 
 const mapStateToProps = (state) => {
-    const {user, characters, guild} = state;
+    const {user, characters} = state;
     return {
         user: user,
-        characters: characters,
-        guild: guild
+        characters: characters
     }
 }
 

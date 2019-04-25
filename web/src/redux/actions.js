@@ -90,19 +90,29 @@ export function bnetLogIn(accessToken) {
     }
 }
 
+/*  FIXME: Commenting out until such time as its necessary to add again.
 export const UPDATE_USER_DATA = 'UPDATE_USER_DATA';
-const update_user_data = ( newCharacterData ) => ({
+const update_user_data = ( userObject ) => ({
     type: UPDATE_USER_DATA,
     payload: {
-        characters: newCharacterData
+        // This will probably be rarely used
     }
 })
+*/
 
-// post an update user object back to our local db.  usefull for updating out stored access token (this might not be ideal) as well
-// as the users character index list.
-export function pushUserData(userObject, characters) {
+export function pushUserData(userObject) {
     return async (dispatch) => {
+        // Clean out unessecary object props before throwing in the db
+        delete userObject.status;
+        delete userObject.newUserStage;
 
+        return fetch(`http://localhost:3005/api/user/${userObject.id}`, {
+            method: "POST",
+            body: JSON.stringify(userObject),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        })
 
     }
 }
@@ -180,7 +190,7 @@ export function updateMain( characterList, id ) {
     }
 }
 
-// This function will need a slight rewrite when ready to add new characters to a users list
+//FIXME: This function will need a slight rewrite when ready to add new characters to a users list
 export function fetchCharacters(accessToken) {
     return async (dispatch) => {
         dispatch(getting_bnet_character_data());
@@ -195,8 +205,8 @@ export function fetchCharacters(accessToken) {
 export function updateCharacterList( oldCharacterData, newCharacterList ) {
     return (dispatch) => {
         let newCharacterData = !Array.isArray(oldCharacterData) ? newCharacterList : null;
-        // this needs works to merge arrays if there is an existing character list for existing users.
-
+        //FIXME: this needs works to merge arrays if there is an existing character list for existing users.
+        //This may be unnecessary now
         dispatch(update_character_data(newCharacterData))
     }
 }
@@ -229,8 +239,20 @@ export function deleteNewCharacterList( ) {
     }
 }
 
-export function pushCharacterData(character) {
+// TODO: This needs proper testing
+export function pushCharacterData(characters) {
     return (dispatch) => {
-        
+        return fetch(`http://localhost:3005/api/characters/update`, {
+            method: "POST",
+            body: JSON.stringify(characters),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        }).then (
+            response => response.json(),
+            error => console.log(error)
+        ).then (
+            json => dispatch(update_character_data(json))
+        )
     }
 }
