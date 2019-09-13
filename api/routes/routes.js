@@ -13,12 +13,19 @@ router.route('/')
 */
 router.route('/user/:id')
     .get((req, res) => {
-        users.findOne({ id: req.params.id }, (err, doc) => {
+        users.findOne({ id: req.params.id }, { fields: { id: 1, battletag: 1 } }, (err, doc) => {
             res.json(doc);
         })
     })
     .post((req, res) => {
         users.findOneAndUpdate({id: req.params.id}, {...req.body}, { upsert: true }, (err, doc) => {
+            res.json(doc);
+        })
+    })
+
+router.route('/user/token/:id')
+    .get((req, res) => {
+        users.findOne({ id: req.params.id }, 'accessToken', (err, doc) => {
             res.json(doc);
         })
     })
@@ -37,7 +44,6 @@ router.route('/characters/update')
         Promise.all(updatedCharacters).then ( (arr) => {
             res.json(arr)
         })
-        //FIXME: This doesnt work.  Wait for req.body.map() to complete and send the results back to redux.
     })
 
 router.route('/guild/:realm/:guild')

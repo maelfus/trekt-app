@@ -1,6 +1,7 @@
 import React, { Component} from 'react';
 import Login from '../presentational/Login';
 import { withRouter } from 'react-router-dom';
+import { withCookies } from 'react-cookie';
 import { connect } from 'react-redux';
 
 class Header extends Component {
@@ -22,4 +23,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default withRouter(connect(mapStateToProps)(Header))
+export default withRouter(withCookies(connect(mapStateToProps)(Header)))

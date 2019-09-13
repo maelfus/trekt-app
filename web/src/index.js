@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 import { Provider } from 'react-redux';
+import { CookiesProvider } from 'react-cookie';
 import configureStore, { history } from './redux/store';
 import App from './App';
 
@@ -11,9 +12,11 @@ import * as serviceWorker from './serviceWorker';
 const store = configureStore();
 
 ReactDOM.render(
-    <Provider store={store}>
-        <App history={history} />
-    </Provider>, 
+    <CookiesProvider>
+        <Provider store={store}>
+            <App history={history} />
+        </Provider>
+    </CookiesProvider>, 
     document.getElementById('root')
 );
 

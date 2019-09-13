@@ -1,3 +1,6 @@
+import Cookies from 'universal-cookie';
+import uuidv4 from 'uuid/v4';
+
 //
 // USER ACTIONS
 //
@@ -53,52 +56,63 @@ export function getUserData(id) {
     }
 };
 
-export const UPDATE_ACCESS_TOKEN = "UPDATE_ACCESS_TOKEN";
-const update_access_token = ( accessToken ) => ({
-    type: UPDATE_ACCESS_TOKEN,
-    payload: {
-        accessToken: accessToken
-    }
-})
 
-export const UPDATE_BNET_DATA = "UPDATE_BNET_DATA";
-const update_bnet_data = ( battletag, id ) => ({
-    type: UPDATE_BNET_DATA,
+//TODO: accessToken storage needs to be moved exclusively to api access.  Don't store it in redux anymore
+export function updateAccessToken(accessToken, userId) {
+    return (dispatch) => {
+        return fetch(`http://localhost:3005/api/user/${userId}`, {
+            method: "POST",
+            body: JSON.stringify({accessToken: accessToken}),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        })
+    }
+}
+
+export function bnetLogIn(accessToken) {
+    return  async (dispatch) => {
+        try {
+            let response = await fetch('https://us.battle.net/oauth/userinfo', {
+                method: "GET",
+                headers: { 
+                    "Content-Type" : "application/json",
+                    "Authorization" : `Bearer ${accessToken}`
+                }
+            })
+            const json = await response.json();
+
+            const sid = uuidv4();
+            const sid_expiry = new Date();
+            sid_expiry.setDate(sid_expiry.getDate() + 1);
+
+            const cookies = new Cookies();
+
+            cookies.set("sid", sid, {
+                path: "/",
+                expires: sid_expiry,
+                secure: false, //FIXME: Change to true for production
+                httpOnly: false,
+                sameSite: 'strict'
+                });
+
+            dispatch(pushUserData({ battletag: json.battletag, id: json.id, accessToken: accessToken, sid: sid, sid_expiry: sid_expiry }))
+        } catch (e) {
+            console.log(e);
+        }
+    }
+}
+
+
+export const UPDATE_USER_DATA = 'UPDATE_USER_DATA';
+const update_user_data = ( battletag, id ) => ({
+    type: UPDATE_USER_DATA,
     payload: {
         battletag: battletag,
         id: id
     }
 })
 
-export function bnetLogIn(accessToken) {
-    return (dispatch) => {
-        dispatch(update_access_token(accessToken))
-        return fetch('https://us.battle.net/oauth/userinfo', {
-            method: "GET",
-            headers: { 
-                "Content-Type" : "application/json",
-                "Authorization" : `Bearer ${accessToken}`
-            }
-        })
-            .then(
-                response => response.json(),
-                error => console.error(`Error retrieving user info: ${error}`)
-            )
-            .then(
-                json => dispatch(update_bnet_data(json.battletag, json.id))
-            )
-    }
-}
-
-/*  FIXME: Commenting out until such time as its necessary to add again.
-export const UPDATE_USER_DATA = 'UPDATE_USER_DATA';
-const update_user_data = ( userObject ) => ({
-    type: UPDATE_USER_DATA,
-    payload: {
-        // This will probably be rarely used
-    }
-})
-*/
 
 export function pushUserData(userObject) {
     return async (dispatch) => {
@@ -106,14 +120,15 @@ export function pushUserData(userObject) {
         delete userObject.status;
         delete userObject.newUserStage;
 
+        dispatch(update_user_data(userObject.battletag, userObject.id));
+
         return fetch(`http://localhost:3005/api/user/${userObject.id}`, {
             method: "POST",
             body: JSON.stringify(userObject),
-            headers:{
+            headers: {
                 'Content-Type': 'application/json'
             }
         })
-
     }
 }
 
@@ -191,6 +206,7 @@ export function updateMain( characterList, id ) {
 }
 
 //FIXME: This function will need a slight rewrite when ready to add new characters to a users list
+// This may be fixed already.
 export function fetchCharacters(accessToken) {
     return async (dispatch) => {
         dispatch(getting_bnet_character_data());
@@ -239,7 +255,6 @@ export function deleteNewCharacterList( ) {
     }
 }
 
-// TODO: This needs proper testing
 export function pushCharacterData(characters) {
     return (dispatch) => {
         return fetch(`http://localhost:3005/api/characters/update`, {
