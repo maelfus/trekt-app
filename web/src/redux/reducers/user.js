@@ -17,7 +17,7 @@ const user = (state = {}, action) => {
                 status: action.payload.status,
                 characters: action.payload.json.characters
 
-                //TODO: Deprecate, this use of this needs to be replaced with a character data check.
+                //TODO: Deprecate, the use of this needs to be replaced with a character data check.
             });
         case UPDATE_USER_DATA:
             return Object.assign({}, state, {

@@ -138,7 +138,7 @@ export function pushUserData(userObject) {
 // Actions related to the guild reducer
 //
 
-export const RECEIVE_GUILD_DATA = 'RECEOVE_GUILD_DATA';
+export const RECEIVE_GUILD_DATA = 'RECEIVE_GUILD_DATA';
 const receive_guild_data = (json) => ({
     type: RECEIVE_GUILD_DATA,
     payload: json
