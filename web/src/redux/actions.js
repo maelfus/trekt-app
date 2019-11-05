@@ -58,6 +58,7 @@ export function getUserData(id) {
 
 
 //TODO: accessToken storage needs to be moved exclusively to api access.  Don't store it in redux anymore
+// Does this also mean moving all bnet api requests to the api too?
 export function updateAccessToken(accessToken, userId) {
     return (dispatch) => {
         return fetch(`http://localhost:3005/api/user/${userId}`, {
@@ -165,7 +166,7 @@ export function fetchGuild( character, accessToken ) {
     }
 }
 
-export function registerNewGuild( realm, guild, accessToken ) {
+function registerNewGuild( realm, guild, accessToken ) {
     return async (dispatch) => {
         await fetch(`https://us.api.blizzard.com/wow/guild/${realm}/${guild}?fields=members&locale=en_US&access_token=${accessToken}`)
             .then (
@@ -173,9 +174,16 @@ export function registerNewGuild( realm, guild, accessToken ) {
                 error => console.error(`Error fetching guild: ${realm}/${guild} - ${ error}`)
             )
             .then (
-                json => {
-
-                }
+                json => fetch(`http://localhost:3005/api/guild/${realm}/${guild}`, {
+                        method: "POST",
+                        body: JSON.stringify(json),
+                        headers: {
+                            'Content-type': 'application/json'
+                        }
+                    })
+                    .then ( /* TODO: dispatch whatever nonsense to the store */
+                        response => receive_guild_data(response.json())
+                        )
             )
     }
 }
